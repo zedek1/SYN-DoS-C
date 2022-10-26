@@ -24,7 +24,6 @@
  * WSA needs to be initialized for a socket to be properly created on windows
  */
 
-// TODO: change fprintf to perror
 #ifdef _WIN32// || _WIN64
     #include <Windows.h> // windows API functions
     #include <WinSock2.h> // windows sockets
