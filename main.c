@@ -22,9 +22,7 @@
  * i made sure the threads closed properly so a memory leak doesn't happen in tcp_checksum()
  * using normal windows API threads for windows and pthread for linux
  * WSA needs to be initialized for a socket to be properly created on windows
- * 
  */
-
 
 // TODO: change fprintf to perror
 #ifdef _WIN32// || _WIN64
@@ -60,6 +58,7 @@ unsigned int thread_count;
 #ifdef _WIN32
     DWORD WINAPI syn_flood(LPVOID args)
 #else
+    unsigned int thread_count;
     void *syn_flood()
 #endif
 {
@@ -144,7 +143,9 @@ unsigned int thread_count;
         tcph->check = tcp_checksum(iph, tcph);
     }
     printf("Done! sent %d packets\n");
-    __sync_fetch_and_sub(&thread_count,1);
+    #ifndef _WIN32
+        __sync_fetch_and_sub(&thread_count,1);
+    #endif
 }
 
 int main()
