@@ -1,30 +1,26 @@
 /* 
  * SYN DOS C - github.com/zedek1
- * this program will send a SYN packet with a false source address
- * which will leave the server in a "half open" state where it is waiting for an ack
- * ^ that state uses a certain amount of memory, so when we "flood" the server with these packets
- * the server will have trouble letting in new connections because it's still focusing on these
+ * this program will spam SYN packets that have a false source address
+ * which will leave the server in many many "half open" states
  *
- * also certain flags will be set in the tcp header to avoid ips pattern recognition
- * as well as a different ip address, id, and sequence number in each packet.
- * so every packet is different
- * 
+ * also certain flags have been set in the tcp header to make the packets more unique
+ * this includes random id, and sequence number
+ * i also made the option to have tcp flags changing at different intervals
+ *
  * - Headers
- * the ip and tcp header is neccessary for building the packet from scatch with our own details
- * in header.h i make my own structs for ip & tcp header so it can be compiled on windows
+ * the ip and tcp header is neccessary for building the datagram from scratch with our own details
+ * in header.h i made the structs for the ip & tcp header instead of including netinet libraries so it can be compiled on windows
  * 
  * - Numbers
- * i implemented some weird as shit mathy random number generator
+ * i implemented some weird as shit mathy random number generator from wikipedia
  * it works so so so much faster than normal rand()
- * it is only used in the main loop because the setup does not need to be fast
  * 
  * - Threads & Platform compatibility
- * i made sure the threads closed properly so a memory leak doesn't happen in tcp_checksum()
+ * i made sure to be careful with threads considering the usage of dynamic memory in tcp_checksum()
  * using normal windows API threads for windows and pthread for linux
- * WSA needs to be initialized for a socket to be properly created on windows
  */
 
-#ifdef _WIN32// || _WIN64
+#ifdef _WIN32
     #include <Windows.h> // windows API functions
     #include <WinSock2.h> // windows sockets
     #include <WS2tcpip.h> // setsockopt options
