@@ -19,11 +19,9 @@ void header_setup(struct iphdr* iph, struct tcphdr* tcph)
                   (rand_cmwc() >> 16 & 0xFF) << 16 |
                   (rand_cmwc() >> 8 & 0xFF) << 8 |
                   (rand_cmwc() & 0xFF); // random IP
-                  
                   // using bitmap because that's what ip_src likes
 
-
-
+    
     // ======== TCP HEADER ========
     tcph->source = htons(rand_cmwc() & 0xFFFF); // random port
     tcph->seq = rand_cmwc() & 0xFFFF; // random sequence number
