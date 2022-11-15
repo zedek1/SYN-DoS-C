@@ -1,7 +1,6 @@
 #include "headers.h"
 #include "randcmwc.h"
 
-//uint8_t MAXTTL = 2147483647;
 
 void header_setup(struct iphdr* iph, struct tcphdr* tcph)
 {
@@ -20,7 +19,6 @@ void header_setup(struct iphdr* iph, struct tcphdr* tcph)
                   (rand_cmwc() >> 8 & 0xFF) << 8 |
                   (rand_cmwc() & 0xFF); // random IP
                   // using bitmap because that's what ip_src likes
-
     
     // ======== TCP HEADER ========
     tcph->source = htons(rand_cmwc() & 0xFFFF); // random port
