@@ -44,18 +44,18 @@ struct tcphdr
     uint16_t dest;      // destination port
     uint32_t seq;       // sequence number - doesn't matter in this senario
     uint32_t ack_seq;   // acknowledgement number - for error handling (doesn't matter)
-	uint16_t res1:4;    // res1 flag
-	uint16_t doff:4;    // min is 5 which = 20 bytes <- all we need because no options set
-	uint16_t fin:1;     // finish flag
-	uint16_t syn:1;     // synchronize flag
-	uint16_t rst:1;     // reset flag, reset connection
-	uint16_t psh:1;     // push flag
-	uint16_t ack:1;     // ackknowledge flag
-	uint16_t urg:1;     // indicates whether the urgent pointer field is significant
-	uint16_t res2:2;    // res2 flag
-	uint16_t window;    // size of the receive window, how much im willing to receive
-	uint16_t check;     // tcp checksum
-	uint16_t urg_ptr;   // used if urg flag is set, the last urgent byte from seq num
+    uint16_t res1:4;    // res1 flag
+    uint16_t doff:4;    // min is 5 which = 20 bytes <- all we need because no options set
+    uint16_t fin:1;     // finish flag
+    uint16_t syn:1;     // synchronize flag
+    uint16_t rst:1;     // reset flag, reset connection
+    uint16_t psh:1;     // push flag
+    uint16_t ack:1;     // ackknowledge flag
+    uint16_t urg:1;     // indicates whether the urgent pointer field is significant
+    uint16_t res2:2;    // res2 flag
+    uint16_t window;    // size of the receive window, how much im willing to receive
+    uint16_t check;     // tcp checksum
+    uint16_t urg_ptr;   // used if urg flag is set, the last urgent byte from seq num
 };
 
 void header_setup(struct iphdr* iph, struct tcphdr* tcph);
