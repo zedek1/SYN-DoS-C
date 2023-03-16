@@ -14,10 +14,11 @@ void header_setup(struct iphdr* iph, struct tcphdr* tcph)
     iph->ttl = 255; // #define MAXTTL 255
     iph->protocol = IPPROTO_TCP; // TCP = protocol number 6
     iph->check = 0; // 0 for now
-    iph->ip_src = (rand_cmwc() >> 24 & 0xFF) << 24 |
-                  (rand_cmwc() >> 16 & 0xFF) << 16 |
-                  (rand_cmwc() >> 8 & 0xFF) << 8 |
-                  (rand_cmwc() & 0xFF); // random IP
+    uint32_t random_num = rand_cmwc();
+    iph->ip_src = (random_num >> 24 & 0xFF) << 24 |
+                  (random_num >> 16 & 0xFF) << 16 |
+                  (random_num >> 8 & 0xFF) << 8 |
+                  (random_num & 0xFF); // random IP
                   // using bitmap because that's what ip_src likes
     
     // ======== TCP HEADER ========
