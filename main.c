@@ -1,5 +1,5 @@
 /* 
- * SYN DOS C - github.com/zedek1
+ * made by ZED
  * this program will spam SYN packets that have a false source address
  * which will leave the server in many many "half open" states
  *
